@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Event; // ឬ Model ដែលអ្នកប្រើប្រាស់សម្រាប់ទិន្នន័យកម្មវិធី
+use App\Models\User; // កុំភ្លេចហៅ Model User មកប្រើប្រាស់ខាងលើ Controller
+
 
 class UserController extends Controller
 {
@@ -30,10 +32,38 @@ class UserController extends Controller
             return redirect('/');
         }
     }
+   public function Logout(Request $request){
+    Auth::logout();
+    
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('login')->with('success', 'logout successfully...!');
+}
 
     public function Register(){
         return view('register');
     }
+    public function RegisterSubmit(Request $request)
+{
+    // ១. ផ្ទៀងផ្ទាត់ទិន្នន័យ (Validation)
+    $request->validate([
+        'username' => 'required|string|max:255',
+        'email'    => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:3',
+    ]);
+
+    // ២. រក្សាទុកទិន្នន័យចូលក្នុង Database
+    User::create([
+        'name'     => $request->username, // ប្តូរទៅតាម Column ក្នុង Database របស់អ្នក (ជួនកาล 'name' ឬ 'username')
+        'email'    => $request->email,
+        'password' => Hash::make($request->password), // encrypt password ឱ្យមានសុវត្ថិភាព
+    ]);
+
+    // ៣. បញ្ជូនទៅកាន់ទំព័រ Login ឬ ទំព័រដើម ព្រមទាំងផ្ញើសារជោគជ័យ
+    return redirect()->route('login')->with('success', 'Registration successful! Please login.');
+}
+
 
     // 3. បង្ហាញបញ្ជី និង Filter តាមឈ្មោះម្ចាស់កម្មវិធី + គណនាតួលេខសរុប
     public function List(Request $request)

@@ -41,9 +41,10 @@ Route::get('/',              [UserController::class, 'Login'])->name('login');
 Route::post('/login-submit', [UserController::class, 'LoginSubmit']);
 Route::get('/update-password', [UserController::class, 'updatePassword']);
 
+Route::post('/logout',              [UserController::class, 'Logout'])->name('logout');
 
 Route::get('/register',              [UserController::class, 'Register'])->name('register');
-Route::post('/login-submit', [UserController::class, 'LoginSubmit']);
+Route::post('/register-submit', [UserController::class, 'RegisterSubmit'])->name('register-submit');
 
 
 Route::get('/dashboard', [AttendanceController::class, 'Dashboard'])->name('dashboard');
@@ -56,6 +57,6 @@ Route::get('/updatecoustomer/{idupdate}', [AttendanceController::class, 'UdateCo
 Route::post('/updatecoustomer-submit', [AttendanceController::class, 'UdateCoustomerSubmit'])->name('updatecoustomer-submit');
 
 
-Route::delete('/deleted/{id_dele}', [AttendanceController::class, 'DeleteAtten'])->name('deleted');
+Route::delete('/deleted/{id_dele}', [AttendanceController::class, 'DeleteCustomer'])->name('deleted');
 
 

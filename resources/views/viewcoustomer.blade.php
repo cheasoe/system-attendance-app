@@ -269,43 +269,45 @@
                     </thead>
 
                     <tbody>
-                        @forelse ($getquery as $item)
-                            <tr>
-                                <td class="text-start">{{ $item->id }}</td>
-                                <td class="text-start">{{ $item->fullname }}</td>
-                                <td class="text-start">{{ $item->money }} {{ $item->symbol }}</td>
-                                <td class="text-start">{{ $item->location }}</td>
-                                <td class="text-start">{{ $item->created_at }}</td>
-                                <td style="text-align: center; vertical-align: middle;">
-                                    <div style="display: flex; justify-content: center; align-items: center; gap: 5px;">
-                                        <!-- ប៊ូតុងកែប្រែ បើក EDIT MODAL -->
-                                        <button class="btn btn-sm btn-update text-white btn-edit" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#editCustomerModal"
-                                                data-id="{{ $item->id }}"
-                                                data-fullname="{{ $item->fullname }}"
-                                                data-money="{{ $item->money }}"
-                                                data-symbol="{{ $item->symbol }}"
-                                                data-location="{{ $item->location }}">
-                                            កែប្រែ
-                                        </button>
+             @forelse ($getquery as $item)
+            <tr>
+                
+                <td class="text-start">{{ $loop->count - $loop->iteration + 1 }}</td>
+                
+                <td class="text-start">{{ $item->fullname }}</td>
+                <td class="text-start">{{ number_format($item->money) }} {{ $item->symbol }}</td>
+                <td class="text-start">{{ $item->location }}</td>
+                <td class="text-start">{{ $item->created_at }}</td>
+                <td style="text-align: center; vertical-align: middle;">
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 5px;">
+                        <!-- ប៊ូតុងកែប្រែ បើក EDIT MODAL -->
+                        <button class="btn btn-sm btn-update text-white btn-edit" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#editCustomerModal"
+                                data-id="{{ $item->id }}" 
+                                data-fullname="{{ $item->fullname }}"
+                                data-money="{{ $item->money }}"
+                                data-symbol="{{ $item->symbol }}"
+                                data-location="{{ $item->location }}">
+                            កែប្រែ
+                        </button>
 
-                                        <form action="{{ url('deleted/' . $item->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this customer?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-delete text-white">លុប</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    No customer found.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
+                        <form action="{{ url('deleted/' . $item->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this customer?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-delete text-white">លុប</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    ទិន្នន័យមិនទានមាននោះទេ...!
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
                 </table>
             </div>
 
@@ -337,7 +339,9 @@
                     <div class="mb-3">
                         <label for="add_money" class="form-label fw-semibold">ចំណងដៃ (Gift Amount)</label>
                         <div class="input-group">
-                            <input type="number" step="0.01" class="form-control" id="add_money" name="money" placeholder="0.00" required>
+                            <!-- ប្តូរពី type="number" មកជា type="text" និងបន្ថែម oninput -->
+                            <input type="text" class="form-control" id="add_money" name="money" placeholder="0.00" autocomplete="off" required>
+                            
                             <select class="form-select" name="symbol" style="max-width: 100px;">
                                 <option value="$">$</option>
                                 <option value="៛">៛</option>
@@ -437,6 +441,33 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+
+    const moneyInput = document.getElementById('add_money');
+
+    moneyInput.addEventListener('input', function (e) {
+        // ១. ដកសញ្ញាក្បៀសទាំងអស់ចេញសិន ដើម្បីយកតែតួលេខសុទ្ធ
+        let value = this.value.replace(/,/g, '');
+        
+        // ២. ពិនិត្យមើលបើជាតួលេខ ទើបធ្វើការจัด formatting ឡើងវិញ
+        if (!isNaN(value) && value !== '') {
+            let parts = value.split('.');
+            // ប្រើ Regex ត្រឹមត្រូវដើម្បីបែងចែកខ្ទង់រウザ (រៀងរាល់ ៣ ខ្ទង់)
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            this.value = parts.join('.');
+        } else if (value === '') {
+            this.value = '';
+        }
+    });
+
+    // មុនពេល Form Submit ទៅកាន់ Server យើងត្រូវលុបសញ្ញាក្បៀសចេញវិញដដែល
+    const form = moneyInput.closest('form');
+    if (form) {
+        form.addEventListener('submit', function () {
+            moneyInput.value = moneyInput.value.replace(/,/g, '');
+        });
+    }
+
 </script>
 
 </body>
