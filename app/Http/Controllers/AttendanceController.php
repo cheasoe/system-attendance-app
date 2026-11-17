@@ -7,10 +7,24 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CustomersExport;
+use App\Models\Attendance;
 class AttendanceController extends Controller
 {
-    public function Dashboard(){
-        return view('dashboard');
+    
+   public function Dashboard()
+    {
+        $userId = Auth::id();
+
+        $totalUSD = Attendance::where('user_id', $userId)
+                              ->where('currency', 1)
+                              ->sum('money');
+
+        // បូកសរុបទឹកប្រាក់ជា រៀល (currency = 2) សម្រាប់តែ User ដែលកំពុង Login
+        $totalKHR = Attendance::where('user_id', $userId)
+                              ->where('currency', 2)
+                              ->sum('money');
+
+        return view('dashboard', compact('totalUSD', 'totalKHR'));
     }
 
 public function ViewCoustomer(Request $request) {

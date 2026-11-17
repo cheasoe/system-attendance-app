@@ -343,8 +343,8 @@
                             <input type="text" class="form-control" id="add_money" name="money" placeholder="0.00" autocomplete="off" required>
                             
                             <select class="form-select" name="symbol" style="max-width: 100px;">
-                                <option value="$">$</option>
-                                <option value="៛">៛</option>
+                                <option value="1">$</option>
+                                <option value="2">៛</option>
                             </select>
                         </div>
                     </div>

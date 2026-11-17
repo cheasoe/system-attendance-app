@@ -31,6 +31,7 @@ class UserController extends Controller
         } else {
             return redirect('/');
         }
+       
     }
    public function Logout(Request $request){
     Auth::logout();
@@ -99,6 +100,77 @@ class UserController extends Controller
             'totalGuests', 
             'totalAmount'
         ));
+    }
+
+
+
+
+
+    // ១. បង្ហាញបញ្ជី User ទាំងអស់
+    public function index()
+    {
+        $users = User::all();
+        return view('admin.users.index', compact('users'));
+    }
+
+    // ២. រក្សាទុក User ថ្មី (Insert)
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:3',
+            'role'     => 'required|in:1,2', // 1 = Admin, 2 = Staff
+        ]);
+
+        User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => $request->role,
+        ]);
+
+        return redirect()->route('admin.users.index')->with('success', 'បានបន្ថែមអ្នកប្រើប្រាស់ដោយជោគជ័យ!');
+    }
+
+    // ៣. កែប្រែទិន្នន័យ User (Update)
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'role'  => 'required|in:1,2',
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        
+        // បើមានការបញ្ចូល Password ថ្មី ទើបทำการ Hash និង update
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->role = $request->role;
+        $user->save();
+
+        return redirect()->route('admin.users.index')->with('success', 'បានកែប្រែទិន្នន័យដោយជោគជ័យ!');
+    }
+
+    // ៤. លុប User (Delete)
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+
+        // ការពារកុំឱ្យលុប Account ខ្លួនឯងកំពុង Login
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'អ្នកមិនអាចលុប Account របស់ខ្លួនឯងបានទេ!');
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')->with('success', 'បានលុបអ្នកប្រើប្រាស់ដោយជោគជ័យ!');
     }
 }
 ?>
