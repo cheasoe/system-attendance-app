@@ -11,10 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 use Illuminate\Http\Request;
 
-Route::get('/customers/export', [
-    AttendanceController::class,
-    'ExportCustomers'
-])->name('customers.export');
+Route::get('/customers/export', [AttendanceController::class,'ExportCustomers'])->name('customers.export');
 
 
 Route::get('/list', [UserController::class, 'List'])->name('list');

@@ -16,15 +16,19 @@ class AttendanceController extends Controller
         $userId = Auth::id();
 
         $totalUSD = Attendance::where('user_id', $userId)
-                              ->where('currency', 1)
-                              ->sum('money');
+                            ->where('currency', 1)
+                            ->sum('money');
 
         // បូកសរុបទឹកប្រាក់ជា រៀល (currency = 2) សម្រាប់តែ User ដែលកំពុង Login
         $totalKHR = Attendance::where('user_id', $userId)
-                              ->where('currency', 2)
-                              ->sum('money');
+                            ->where('currency', 2)
+                            ->sum('money');
 
-        return view('dashboard', compact('totalUSD', 'totalKHR'));
+        // រាប់ចំនួនភ្ញៀវសរុបតាម user_id (សូមប្តូរ Attendance ទៅជា Model ភ្ញៀវរបស់អ្នក បើសិនជាដាច់ដោយឡែក)
+        $totalCustomers = Attendance::where('user_id', $userId)->count(); 
+        // ឬបើប្រើ Model ផ្សេង ឧទាហរណ៍: $totalCustomers = Customer::where('user_id', $userId)->count();
+
+        return view('dashboard', compact('totalUSD', 'totalKHR', 'totalCustomers'));
     }
 
 public function ViewCoustomer(Request $request) {
@@ -50,10 +54,11 @@ public function ViewCoustomer(Request $request) {
         return view('viewcoustomer', ['getquery' => $sql]);
     }
 
-    public function ExportCustomers(Request $request)
-    {
+    public function ExportCustomers(Request $request){
+        $userId = Auth::id(); 
+
         return Excel::download(
-            new CustomersExport($request->search),
+            new CustomersExport($request->search, $userId),
             'customers.xlsx'
         );
     }
